@@ -245,10 +245,12 @@ int cl_decode_apdu(uint8_t *apdu,
         case BACNET_APPLICATION_TAG_REAL:
             len = decode_context_real(&apdu[dec_len], 4, &bcl->Value.type.Real);
             break;
+#if defined(BACAPP_TYPES_EXTRA)
         case BACNET_APPLICATION_TAG_DOUBLE:
             len = decode_context_double(
                 &apdu[dec_len], 4, &bcl->Value.type.Double);
             break;
+#endif
         case BACNET_APPLICATION_TAG_OCTET_STRING:
             len = decode_context_octet_string(
                 &apdu[dec_len], 4, &bcl->Value.type.Octet_String);

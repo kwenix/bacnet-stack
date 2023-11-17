@@ -341,15 +341,15 @@ set(BACNETSTACK_BASIC_SRCS
     ${BACNETSTACK_SRC}/bacnet/basic/object/channel.c
     #${BACNETSTACK_SRC}/bacnet/basic/object/client/device-client.c
     ${BACNETSTACK_SRC}/bacnet/basic/object/command.c
-    ${BACNETSTACK_SRC}/bacnet/basic/object/color_object.c
-    ${BACNETSTACK_SRC}/bacnet/basic/object/color_temperature.c
+    $<$<BOOL:${CONFIG_BACAPP_TYPES_EXTRA}>:${BACNETSTACK_SRC}/bacnet/basic/object/color_object.c>
+    $<$<BOOL:${CONFIG_BACAPP_TYPES_EXTRA}>:${BACNETSTACK_SRC}/bacnet/basic/object/color_temperature.c>
     ${BACNETSTACK_SRC}/bacnet/basic/object/credential_data_input.c
     ${BACNETSTACK_SRC}/bacnet/basic/object/csv.c
     ${BACNETSTACK_SRC}/bacnet/basic/object/device.c
     $<$<BOOL:${CONFIG_BAC_ROUTING}>:${BACNETSTACK_SRC}/bacnet/basic/object/gateway/gw_device.c>
     ${BACNETSTACK_SRC}/bacnet/basic/object/iv.c
     ${BACNETSTACK_SRC}/bacnet/basic/object/lc.c
-    ${BACNETSTACK_SRC}/bacnet/basic/object/lo.c
+    $<$<BOOL:${CONFIG_BACAPP_TYPES_EXTRA}>:${BACNETSTACK_SRC}/bacnet/basic/object/lo.c>
     ${BACNETSTACK_SRC}/bacnet/basic/object/lsp.c
     ${BACNETSTACK_SRC}/bacnet/basic/object/ms-input.c
     ${BACNETSTACK_SRC}/bacnet/basic/object/mso.c
@@ -414,6 +414,7 @@ list(
   APPEND BACNETSTACK_SRCS
       ${BACNETSTACK_BASIC_SRCS}
       ${BACNETSTACK_PORT}/datetime-init.c
+      $<$<BOOL:${CONFIG_BACDL_MSTP}>:${BACNETSTACK_PORT}/dlmstp.c>
       $<$<BOOL:${CONFIG_BACDL_BIP}>:${BACNETSTACK_PORT}/bip-init.c>
       $<$<BOOL:${CONFIG_BACDL_BIP6}>:${BACNETSTACK_PORT}/bip6-init.c>
       $<$<BOOL:${CONFIG_BACDL_BIP}>:${BACNETSTACK_PORT}/datalink/bvlc.c>
@@ -446,6 +447,10 @@ zephyr_library_compile_definitions(
   $<$<BOOL:${CONFIG_BACNET_ROUTING}>:BACNET_ROUTING>
   $<$<BOOL:${CONFIG_BACAPP_PRINT_ENABLED}>:BACAPP_PRINT_ENABLED=1>
   $<$<BOOL:${CONFIG_BACAPP_SNPRINTF_ENABLED}>:BACAPP_SNPRINTF_ENABLED=1>
+  $<$<BOOL:${CONFIG_BACAPP_MINIMAL}>:BACAPP_MINIMAL>
+  #FIXME: CONFIG_BACAPP_ALL fails to build
+  #$<$<BOOL:${CONFIG_BACAPP_ALL}>:BACAPP_ALL>
+  #$<$<BOOL:${CONFIG_BACAPP_TYPES_EXTRA}>:BACAPP_TYPES_EXTRA>
   $<$<BOOL:${CONFIG_BACNET_ADDRESS_CACHE_FILE}>:BACNET_ADDRESS_CACHE_FILE=1>
   )
 
@@ -471,8 +476,15 @@ target_compile_definitions(
   $<$<BOOL:${CONFIG_BACNET_ROUTING}>:BACNET_ROUTING>
   $<$<BOOL:${CONFIG_BACAPP_PRINT_ENABLED}>:BACAPP_PRINT_ENABLED=1>
   $<$<BOOL:${CONFIG_BACAPP_SNPRINTF_ENABLED}>:BACAPP_SNPRINTF_ENABLED=1>
+  $<$<BOOL:${CONFIG_BACAPP_MINIMAL}>:BACAPP_MINIMAL>
+  #FIXME: CONFIG_BACAPP_ALL fails to build
+  #$<$<BOOL:${CONFIG_BACAPP_ALL}>:BACAPP_ALL>
+  #$<$<BOOL:${CONFIG_BACAPP_TYPES_EXTRA}>:BACAPP_TYPES_EXTRA>
   $<$<BOOL:${CONFIG_BACNET_ADDRESS_CACHE_FILE}>:BACNET_ADDRESS_CACHE_FILE=1>
   BACNET_STACK_STATIC_DEFINE
   PRINT_ENABLED=1
   )
 
+  zephyr_library_compile_options(
+    -Wno-deprecated-declarations
+  )

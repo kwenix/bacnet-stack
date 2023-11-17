@@ -5,15 +5,15 @@
  */
 
 #include <stdalign.h> /*TODO: Not std until C11! */
-#include <device.h>
-#include <init.h>
-#include <kernel.h>
-#include <net/net_if.h>
-#include <net/net_core.h>
-#include <net/net_context.h>
-#include <net/net_mgmt.h>
-#include <net/net_ip.h>
-#include <sys/printk.h>
+#include <zephyr/device.h>
+#include <zephyr/init.h>
+#include <zephyr/kernel.h>
+#include <zephyr/net/net_if.h>
+#include <zephyr/net/net_core.h>
+#include <zephyr/net/net_context.h>
+#include <zephyr/net/net_mgmt.h>
+#include <zephyr/net/net_ip.h>
+#include <zephyr/sys/printk.h>
 /* some BACnet modules we use */
 #include "bacnet/bacdef.h"
 #include "bacnet/config.h"
@@ -32,11 +32,12 @@
 /* our datalink layers */
 #include "bacnet/datalink/bip.h"
 #include "bacnet/datalink/bvlc.h"
+#include "bacnet/datalink/datalink.h"
 /* include the device object */
 #include "bacnet/basic/object/device.h"
 
 /* Logging module registration is already done in ports/zephyr/main.c */
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(bacnet, CONFIG_BACNETSTACK_LOG_LEVEL);
 
 enum bacnet_server_msg_type {
@@ -61,11 +62,13 @@ static struct k_thread server_thread_data;
 static K_THREAD_STACK_DEFINE(server_thread_stack,
 			     CONFIG_BACNETSTACK_BACNET_SERVER_STACK_SIZE);
 
+#ifdef BACDL_BIP
 /* Keep a reference to the Ethernet interface */
 static struct net_mgmt_event_callback mgmt_cb;
 
 /* track our directly connected ports network number */
 static uint16_t BIP_Net;
+#endif
 /* buffer for receiving packets from the directly connected ports */
 static uint8_t BIP_Rx_Buffer[MAX_MPDU];
 
@@ -102,11 +105,12 @@ static void service_handlers_init(void)
 		handler_device_communication_control);
 }
 
+#ifdef BACDL_BIP
 /* TODO: Update copyright as this code pattern copied from
  *       conn_mgr_ipv4_events_handler()
  */
 static void ipv4_events_handler(struct net_mgmt_event_callback *cb,
-				u32_t mgmt_event, struct net_if *iface)
+				uint32_t mgmt_event, struct net_if *iface)
 {
 	static int counter = 0;
 	printk("\n*** Handler[%d]: IPv4 event %08x received on iface %p ***\n",
@@ -130,6 +134,7 @@ static void ipv4_events_handler(struct net_mgmt_event_callback *cb,
 		       counter, msg.type, msg.parm_u32, msg.parm_ptr);
 	}
 }
+#endif
 
 /**
  * @brief BACnet Server Thread
@@ -139,15 +144,17 @@ static void server_thread(void)
 	LOG_INF("Server: started");
 	service_handlers_init();
 
-	bip_init("Server: from init");
+	datalink_init("Server: from init");
+#ifdef BACDL_BIP
 	BIP_Net = 1;
 
 	net_mgmt_init_event_callback(&mgmt_cb, ipv4_events_handler,
 				     SERVER_IPV4_EVENTS_MASK);
 	net_mgmt_add_event_callback(&mgmt_cb);
+#endif
 
 	while (1) {
-		const s32_t sleep_ms = K_FOREVER;
+		const k_timeout_t sleep_ms = K_FOREVER;
 
 		struct bacnet_server_msg msg = {
 			.type = SERVER_MSG_TYPE_INVALID,
@@ -161,7 +168,7 @@ static void server_thread(void)
 			}; /* address where message came from */
 			/* input */
 			/* returns 0 bytes on timeout */
-			uint16_t pdu_len = bip_receive(&src, &BIP_Rx_Buffer[0],
+			uint16_t pdu_len = datalink_receive(&src, &BIP_Rx_Buffer[0],
 						       MAX_MPDU, 5);
 
 			/* process */
@@ -178,7 +185,7 @@ static void server_thread(void)
 			case SERVER_MSG_TYPE_IPV4_EVENT: {
 				LOG_INF("Server: MSG_TYPE_IPV4_EVENT u32: %08x ptr: %p",
 					msg.parm_u32, msg.parm_ptr);
-				const u32_t mgmt_event = msg.parm_u32;
+				const uint32_t mgmt_event = msg.parm_u32;
 				//TODO: const struct net_if *iface = msg.parm_ptr;
 
 				/* Handle events */
@@ -225,10 +232,8 @@ static void server_thread(void)
 	}
 }
 
-static int server_init(struct device *dev)
+static int server_init(void)
 {
-	ARG_UNUSED(dev);
-
 	k_thread_create(&server_thread_data, server_thread_stack,
 			K_THREAD_STACK_SIZEOF(server_thread_stack),
 			(k_thread_entry_t)server_thread, NULL, NULL, NULL,

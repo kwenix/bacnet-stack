@@ -251,7 +251,7 @@ void handler_read_property_multiple(uint8_t *service_request,
                     (rpmdata.object_instance == BACNET_MAX_INSTANCE)) {
                     rpmdata.object_instance = Device_Object_Instance_Number();
                 }
-#if (BACNET_PROTOCOL_REVISION >= 17)
+#if (BACNET_PROTOCOL_REVISION >= 17) && defined(BACDL_BIP)
                 /* When the object-type in the Object Identifier parameter
                    contains the value NETWORK_PORT and the instance in the
                    'Object Identifier' parameter contains the value 4194303,

@@ -54,6 +54,7 @@
 LOG_MODULE_DECLARE(bacnet, CONFIG_BACNETSTACK_LOG_LEVEL);
 
 #define THIS_FILE "bip6-init.c"
+#define log_strdup(x) (x)
 
 #if (MAX_MAC_LEN < BIP6_ADDRESS_MAX) /* Make sure an 18 byte address can be stored */
 #error "BACNET_ADDRESS.mac (bacdef.h) is not large enough to store an IPv6 address."

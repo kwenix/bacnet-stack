@@ -100,7 +100,7 @@ static object_functions_t My_Object_Table[] = {
         NULL /* Intrinsic Reporting */, NULL /* Add_List_Element */,
         NULL /* Remove_List_Element */,
         NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
-#if (BACNET_PROTOCOL_REVISION >= 17)
+#if (BACNET_PROTOCOL_REVISION >= 17) && (defined(BACDL_BIP) || defined(BACDL_BIP6))
     { OBJECT_NETWORK_PORT, Network_Port_Init, Network_Port_Count,
         Network_Port_Index_To_Instance, Network_Port_Valid_Instance,
         Network_Port_Object_Name, Network_Port_Read_Property,
@@ -250,7 +250,7 @@ static object_functions_t My_Object_Table[] = {
         NULL /* COV Clear */, NULL /* Intrinsic Reporting */,
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
         NULL /* Create */, NULL /* Delete */ , NULL /* Timer */},
-#if (BACNET_PROTOCOL_REVISION >= 14)
+#if (BACNET_PROTOCOL_REVISION >= 14) && defined(BACAPP_TYPES_EXTRA)
     { OBJECT_LIGHTING_OUTPUT, Lighting_Output_Init, Lighting_Output_Count,
         Lighting_Output_Index_To_Instance, Lighting_Output_Valid_Instance,
         Lighting_Output_Object_Name, Lighting_Output_Read_Property,
@@ -267,7 +267,7 @@ static object_functions_t My_Object_Table[] = {
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
         Channel_Create, Channel_Delete, NULL /* Timer */ },
 #endif
-#if (BACNET_PROTOCOL_REVISION >= 24)
+#if (BACNET_PROTOCOL_REVISION >= 24) && defined(BACAPP_TYPES_EXTRA)
     { OBJECT_COLOR, Color_Init, Color_Count, Color_Index_To_Instance,
         Color_Valid_Instance, Color_Object_Name, Color_Read_Property,
         Color_Write_Property, Color_Property_Lists, NULL /* ReadRangeInfo */,

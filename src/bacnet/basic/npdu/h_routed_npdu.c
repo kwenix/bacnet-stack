@@ -39,6 +39,7 @@
 #include "bacnet/basic/sys/debug.h"
 #include "bacnet/basic/services.h"
 #include "bacnet/datalink/datalink.h"
+#include "bacnet/basic/bbmd/h_bbmd.h"
 
 #if PRINT_ENABLED
 #include <stdio.h>

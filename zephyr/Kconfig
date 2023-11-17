@@ -61,6 +61,23 @@ config BACAPP_SNPRINTF_ENABLED
 	help
 		Enable BACnet app snprintf
 
+config BACAPP_TYPES_EXTRA
+    bool "BACnet extra types"
+    default n
+    help
+        Enable BACnet app extra types
+
+config BACAPP_MINIMAL
+    bool "BACnet minimal"
+    help
+        Enable BACnet minimal
+
+config BACAPP_ALL
+    bool "BACnet minimal"
+    select BACAPP_TYPES_EXTRA
+    help
+        Enable BACnet minimal
+
 config BACDL_BIP_PORT
 	int "BACnet IPv4 UDP port"
 	default 47808
